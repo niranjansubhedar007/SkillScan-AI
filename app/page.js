@@ -13,6 +13,7 @@ const Home = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const [toast, setToast] = useState(null);
+const [method, setMethod] = useState("embeddings"); // 'embeddings' or 'chat'
 
   // Toast helper functions
   const showToast = (message, type) => {
@@ -87,6 +88,7 @@ const Home = () => {
     const formData = new FormData();
     formData.append("resume", resume);
     formData.append("message", message);
+    formData.append("method", method); // 'embeddings' or 'chat'
 
     try {
       const res = await fetch("/api/chat", {
@@ -137,6 +139,7 @@ const Home = () => {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {/* Toast Container */}
       {toast && (
@@ -335,7 +338,33 @@ const Home = () => {
                 </button>
               </div>
             </form>
-
+<div className=" mt-5">
+  <label className="block text-sm font-semibold text-gray-200 mb-3">
+    Detection Method
+  </label>
+  <div className="flex gap-4">
+    <label className="flex items-center">
+      <input
+        type="radio"
+        value="embeddings"
+        checked={method === "embeddings"}
+        onChange={(e) => setMethod(e.target.value)}
+        className="mr-2"
+      />
+      <span className="text-gray-300">Embeddings (Fast & Cheap)</span>
+    </label>
+    <label className="flex items-center">
+      <input
+        type="radio"
+        value="chat"
+        checked={method === "chat"}
+        onChange={(e) => setMethod(e.target.value)}
+        className="mr-2"
+      />
+      <span className="text-gray-300">Chat API (More Accurate)</span>
+    </label>
+  </div>
+</div>
             {/* Results Section */}
             {result && result !== "⚠️ Please upload a resume and enter a message." && result !== "❌ An error occurred. Please try again." && (
               <div className="mt-8 animate-fadeInUp">
@@ -473,6 +502,7 @@ const Home = () => {
         }
       `}</style>
     </div>
+    </>
   );
 };
 
