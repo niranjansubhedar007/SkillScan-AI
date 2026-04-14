@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Niranjan AI Portfolio Assistant",
-  description: "An AI assistant for Niranjan Subhedar's portfolio, providing information about his skills, experience, and background.",
+  title: "Skillscan-AI",
+  description: " A tool to help you find the right job based on your skills and experience.",
 };
 
 export default function RootLayout({ children }) {
