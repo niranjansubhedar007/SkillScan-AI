@@ -167,7 +167,7 @@ const Home = () => {
             </h2>
             <p className="mt-6 max-w-2xl mx-auto text-lg text-gray-300">
               Upload your resume and let our advanced AI identify every skill, technology,
-              and competency with 99% accuracy
+              and competency with 99% accuracy.
             </p>
           </div>
 
