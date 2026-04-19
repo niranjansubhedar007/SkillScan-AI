@@ -487,7 +487,7 @@ const Home = () => {
               <div className="px-6 py-5 border-b border-white/10 flex items-center gap-2">
                 <span className="text-base">🗄️</span>
                 <h3 className="text-sm font-semibold text-gray-200">Job Descriptions — Skill Match</h3>
-                <span className="ml-auto text-xs text-gray-500">{jobDescs.length} entries</span>
+                <span className="ml-auto text-xs text-gray-500">Top 5 of {jobDescs.length}</span>
                 {matchLoading && (
                   <span className="ml-3 flex items-center gap-1.5 text-xs text-blue-400">
                     <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
@@ -499,22 +499,24 @@ const Home = () => {
                 )}
               </div>
               <div className="divide-y divide-white/10">
-                {jobDescs.map((job) => {
+                {[...jobDescs]
+                  .sort((a, b) => (matchScores[b.id] ?? 0) - (matchScores[a.id] ?? 0))
+                  .slice(0, 5)
+                  .map((job) => {
                   const score = matchScores[job.id];
                   const hasScore = score !== undefined;
                   const scoreColor =
-                    score >= 60 ? 'bg-green-500' :
+                    score >= 80 ? 'bg-green-500' :
                     score >= 30 ? 'bg-yellow-500' :
                     'bg-red-500';
                   const scoreTextColor =
-                    score >= 60 ? 'text-green-400' :
+                    score >= 80 ? 'text-green-400' :
                     score >= 30 ? 'text-yellow-400' :
                     'text-red-400';
 
                   return (
                     <div key={job.id} className="px-6 py-4">
                       <div className="flex items-start gap-3 mb-2">
-                        <span className="mt-0.5 text-xs font-mono text-purple-400 w-5 shrink-0">#{job.id}</span>
                         <p className="text-sm text-gray-300 flex-1">{job.text}</p>
                         {hasScore && (
                           <span className={`ml-3 shrink-0 text-sm font-bold ${scoreTextColor}`}>
@@ -523,7 +525,7 @@ const Home = () => {
                         )}
                       </div>
                       {hasScore && (
-                        <div className="ml-8 h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                        <div className=" h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-700 ${scoreColor}`}
                             style={{ width: `${score}%` }}
