@@ -17,6 +17,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@langchain/core": "^1.1.40",
+    "@langchain/openai": "^1.4.4",
     "@tailwindcss/postcss": "^4.2.2",
     "autoprefixer": "^10.4.27",
     "lucide-react": "^1.8.0",

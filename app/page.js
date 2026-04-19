@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Toast from "./Toast";
+import defaultJobDescs from "./data/jobDescs";
 
 
 const Home = () => {
@@ -11,6 +12,20 @@ const Home = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const [toast, setToast] = useState(null);
+  const [jobDescs, setJobDescs] = useState([]);
+  const [matchScores, setMatchScores] = useState({});
+  const [matchLoading, setMatchLoading] = useState(false);
+
+  // Always sync localStorage with the latest defaultJobDescs on mount
+  // so adding new JDs to jobDescs.js is immediately reflected
+  useEffect(() => {
+    try {
+      localStorage.setItem("coding", JSON.stringify(defaultJobDescs));
+      setJobDescs(defaultJobDescs);
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
 
   // Toast helper functions
   const showToast = (message, type) => {
@@ -62,6 +77,7 @@ const Home = () => {
 
     setLoading(true);
     setResults([]);
+    setMatchScores({});
     showToast('🔄 Analyzing resumes...', 'info');
 
     const allResults = [];
@@ -80,6 +96,44 @@ const Home = () => {
 
     setResults(allResults);
     const found = allResults.filter(r => r.skillFound).length;
+
+    // Compute embedding match scores against job descriptions
+    const allSkills = allResults
+      .filter(r => r.skillFound && r.contact?.Skills?.length)
+      .flatMap(r => r.contact.Skills);
+
+    if (allSkills.length > 0 && jobDescs.length > 0) {
+      setMatchLoading(true);
+      try {
+        const matchRes = await fetch('/api/match', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userQuery: message,
+            resumeSkills: allSkills.join(', '),
+            jobDescs,
+          }),
+        });
+        const matchData = await matchRes.json();
+        const scores = {};
+        for (const { id, score } of matchData.matches) {
+          scores[id] = score;
+        }
+        setMatchScores(scores);
+      } catch {
+        // silently ignore match errors
+      } finally {
+        setMatchLoading(false);
+      }
+    } else if (jobDescs.length > 0) {
+      // Skill not found — show 0% for all JDs
+      const zeroScores = {};
+      for (const job of jobDescs) {
+        zeroScores[job.id] = 0;
+      }
+      setMatchScores(zeroScores);
+    }
+
     if (found > 0) {
       showToast(`✨ Skill found in ${found} of ${allResults.length} resume(s)!`, 'success');
     } else {
@@ -97,6 +151,14 @@ const Home = () => {
     "Project Management",
     "UI/UX Design",
     "Cloud Computing",
+    "React.js / Next.js",
+    "Node.js / Express",
+    "TypeScript",
+    "Python Django",
+    "REST API design",
+    "CI/CD pipelines",
+    "Algorithm & Data Structures",
+    "SQL & NoSQL databases",
   ];
 
 
@@ -419,6 +481,65 @@ const Home = () => {
 
           </div>{/* end grid */}
 
+          {/* Job Descriptions Database */}
+          {jobDescs.length > 0 && results.length > 0 && (
+            <div className="mt-10 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden">
+              <div className="px-6 py-5 border-b border-white/10 flex items-center gap-2">
+                <span className="text-base">🗄️</span>
+                <h3 className="text-sm font-semibold text-gray-200">Job Descriptions — Skill Match</h3>
+                <span className="ml-auto text-xs text-gray-500">{jobDescs.length} entries</span>
+                {matchLoading && (
+                  <span className="ml-3 flex items-center gap-1.5 text-xs text-blue-400">
+                    <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Computing embeddings…
+                  </span>
+                )}
+              </div>
+              <div className="divide-y divide-white/10">
+                {jobDescs.map((job) => {
+                  const score = matchScores[job.id];
+                  const hasScore = score !== undefined;
+                  const scoreColor =
+                    score >= 60 ? 'bg-green-500' :
+                    score >= 30 ? 'bg-yellow-500' :
+                    'bg-red-500';
+                  const scoreTextColor =
+                    score >= 60 ? 'text-green-400' :
+                    score >= 30 ? 'text-yellow-400' :
+                    'text-red-400';
+
+                  return (
+                    <div key={job.id} className="px-6 py-4">
+                      <div className="flex items-start gap-3 mb-2">
+                        <span className="mt-0.5 text-xs font-mono text-purple-400 w-5 shrink-0">#{job.id}</span>
+                        <p className="text-sm text-gray-300 flex-1">{job.text}</p>
+                        {hasScore && (
+                          <span className={`ml-3 shrink-0 text-sm font-bold ${scoreTextColor}`}>
+                            {score}%
+                          </span>
+                        )}
+                      </div>
+                      {hasScore && (
+                        <div className="ml-8 h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-700 ${scoreColor}`}
+                            style={{ width: `${score}%` }}
+                          />
+                        </div>
+                      )}
+                      {!hasScore && Object.keys(matchScores).length === 0 && !matchLoading && (
+                        <p className="ml-8 text-xs text-gray-600 italic">Run an analysis to see match score</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Stats Section */}
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-3">
             {[
@@ -435,78 +556,7 @@ const Home = () => {
           </div>
         </div>
 
-        <style jsx>{`
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes fadeInScale {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        
-        @keyframes gradient {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        
-        @keyframes toast-slide-in {
-          from {
-            opacity: 0;
-            transform: translateX(100%);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        
-        .animate-fadeInUp {
-          animation: fadeInUp 0.5s ease-out;
-        }
-        
-        .animate-gradient {
-          background-size: 200% 200%;
-          animation: gradient 3s ease infinite;
-        }
-        
-        .animate-toast-slide-in {
-          animation: toast-slide-in 0.3s ease-out;
-        }
-      `}</style>
+   
       </div>
     </>
   );
