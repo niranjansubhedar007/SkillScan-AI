@@ -1,7 +1,9 @@
 // app/api/match/route.js
 import { NextResponse } from 'next/server';
 import { OpenAIEmbeddings } from '@langchain/openai';
+
 import { cosineSimilarity } from '@langchain/core/utils/math';
+import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
 export async function POST(req) {
   try {
@@ -11,14 +13,34 @@ export async function POST(req) {
       return NextResponse.json({ matches: [] });
     }
 
+
+    // Chunk job descriptions using RecursiveCharacterTextSplitter
+    const textSplitter = new RecursiveCharacterTextSplitter({
+      chunkSize: 50,
+      chunkOverlap: 40,
+    });
+
+
+    // Flatten all job descriptions into one string per JD, then split
+
+    // Collect chunks and counts for each JD
+    const jdChunksArr = await Promise.all(
+      jobDescs.map(async (j) => {
+        const chunks = await textSplitter.splitText(j.text);
+        return { id: j.id, chunks, chunkCount: chunks.length };
+      })
+    );
+
+
+    // For RAG, flatten all chunks for embedding
+    const jdTexts = jdChunksArr.flatMap(j => j.chunks);
+
     const embeddings = new OpenAIEmbeddings({
       model: 'text-embedding-3-large',
       apiKey: process.env.OPENAI_API_KEY,
     });
 
-    const jdTexts = jobDescs.map((j) => j.text);
-
-    // Combine the user's original search query with the extracted resume skills
+    // Combine the user's original search query with the extracted resume skill÷s
     // so the embedding captures both intent and evidence
     const queryText = userQuery
       ? `Job requirement: ${userQuery}. Candidate skills: ${resumeSkills}`
@@ -54,7 +76,15 @@ export async function POST(req) {
       const similarity = scores[i];
       const relative = maxSimilarity > 0 ? similarity / maxSimilarity : 0;
       const score = Math.round(Math.pow(relative, 2) * absoluteMultiplier * 100);
-      return { id: job.id, score, rawSimilarity: Math.round(similarity * 1000) / 1000 };
+      // Find chunk info for this JD
+      const chunkInfo = jdChunksArr.find(j => j.id === job.id);
+      return {
+        id: job.id,
+        score,
+        rawSimilarity: Math.round(similarity * 1000) / 1000,
+        chunkCount: chunkInfo ? chunkInfo.chunkCount : 0,
+        chunks: chunkInfo ? chunkInfo.chunks : [],
+      };
     });
 
     return NextResponse.json({ matches });

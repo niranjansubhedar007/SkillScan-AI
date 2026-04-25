@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Toast from "./Toast";
 import defaultJobDescs from "./data/jobDescs";
 
@@ -15,6 +17,8 @@ const Home = () => {
   const [jobDescs, setJobDescs] = useState([]);
   const [matchScores, setMatchScores] = useState({});
   const [matchLoading, setMatchLoading] = useState(false);
+  const [resumeCollections, setResumeCollections] = useState([]);
+  const router = useRouter();
 
   // Always sync localStorage with the latest defaultJobDescs on mount
   // so adding new JDs to jobDescs.js is immediately reflected
@@ -95,6 +99,10 @@ const Home = () => {
     }
 
     setResults(allResults);
+    const collections = allResults
+      .filter(r => r.collectionName)
+      .map(r => ({ fileName: r.fileName, collectionName: r.collectionName }));
+    setResumeCollections(collections);
     const found = allResults.filter(r => r.skillFound).length;
 
     // Compute embedding match scores against job descriptions
@@ -167,6 +175,11 @@ const Home = () => {
     setMessage(e.target.value);
   };
 
+  const openChat = () => {
+    const names = resumeCollections.map(c => c.collectionName).join(',');
+    router.push(`/chat?c=${encodeURIComponent(names)}`);
+  };
+
   const setExamplePrompt = (prompt) => {
     setMessage(prompt);
   };
@@ -207,6 +220,15 @@ const Home = () => {
                 </div>
               </div>
               <div className="flex items-center space-x-4">
+                <Link
+                  href="/chat"
+                  className="hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-gray-300 transition-all duration-200"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                  Resume Chat
+                </Link>
                 <div className="hidden sm:flex items-center space-x-2 text-xs text-gray-300">
                   <div className="h-1.5 w-1.5 bg-green-400 rounded-full animate-pulse"></div>
                   <span>AI Ready</span>
@@ -480,6 +502,24 @@ const Home = () => {
             </div>
 
           </div>{/* end grid */}
+
+          {/* Open Chat CTA */}
+          {resumeCollections.length > 0 && (
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={openChat}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl text-white text-sm font-semibold shadow-lg transition-all duration-200 hover:scale-105"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+                Open Resume Chat
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
+            </div>
+          )}
 
           {/* Job Descriptions Database */}
           {jobDescs.length > 0 && results.length > 0 && (

@@ -1,6 +1,14 @@
 // app/api/chat/route.js
 import { NextResponse } from 'next/server';
 import { extractText, getDocumentProxy } from 'unpdf';
+import { chunkAndStoreResume, searchRelevantChunks } from './chunkResume';
+
+function makeCollectionName(fileName) {
+  const base = fileName.replace(/\.[^/.]+$/, '');
+  const clean = base.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').substring(0, 20).replace(/^_|_$/g, '');
+  const suffix = crypto.randomUUID().replace(/-/g, '').substring(0, 6);
+  return `resume_${clean}_${suffix}`;
+}
 
 // MAIN API HANDLER
 export async function POST(req) {
@@ -29,11 +37,18 @@ export async function POST(req) {
       resumeText = buffer.toString('utf-8');
     }
 
+
     if (!resumeText || resumeText.length < 10) {
       return NextResponse.json({ reply: "Could not read text from file" });
     }
 
-    const limitedText = resumeText.substring(0, 8000);
+    // Chunk resume and store embeddings in its own Qdrant collection
+    const collectionName = makeCollectionName(file.name);
+    await chunkAndStoreResume(resumeText, collectionName);
+
+    // Retrieve the most relevant chunks for the queried skill
+    const relevantChunks = await searchRelevantChunks(skill.trim(), collectionName);
+    const contextText = relevantChunks.join('\n\n');
 
     const systemPrompt = `You are a resume parsing assistant. Given a resume and a skill query, you must:
 1. Check if the skill is mentioned or implied in the resume.
@@ -53,7 +68,7 @@ export async function POST(req) {
 If a contact field is not found, use null for its value. If skillFound is false, contact should be null.
 Return ONLY valid JSON. No extra text.`;
 
-    const userPrompt = `Resume:\n${limitedText}\n\nSkill to search: ${skill.trim()}`;
+    const userPrompt = `Resume (relevant sections):\n${contextText}\n\nSkill to search: ${skill.trim()}`;
 
     const openAIResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -81,7 +96,7 @@ Return ONLY valid JSON. No extra text.`;
       return NextResponse.json({ reply: "Failed to parse AI response" });
     }
 
-    return NextResponse.json(parsed);
+    return NextResponse.json({ ...parsed, collectionName });
 
   } catch (error) {
     console.error("Error:", error);
