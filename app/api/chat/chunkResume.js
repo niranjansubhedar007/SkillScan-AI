@@ -15,13 +15,20 @@ async function getEmbedding(text) {
 }
 
 export async function chunkAndStoreResume(resumeText, collectionName) {
+  await ensureCollection(collectionName);
+
+  // If collection already has vectors, skip re-embedding (same file uploaded again)
+  const info = await qdrant.getCollection(collectionName);
+  if (info.vectors_count > 0) {
+    console.log(`Collection "${collectionName}" already has ${info.vectors_count} vectors — skipping re-embedding.`);
+    return [];
+  }
+
   const textSplitter = new RecursiveCharacterTextSplitter({
     chunkSize: 500,
     chunkOverlap: 50,
   });
   const chunks = await textSplitter.splitText(resumeText);
-
-  await ensureCollection(collectionName);
 
   const points = await Promise.all(
     chunks.map(async (chunk, i) => ({

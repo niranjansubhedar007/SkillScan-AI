@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Toast from "./Toast";
-import defaultJobDescs from "./data/jobDescs";
 
 
 const Home = () => {
@@ -20,15 +19,12 @@ const Home = () => {
   const [resumeCollections, setResumeCollections] = useState([]);
   const router = useRouter();
 
-  // Always sync localStorage with the latest defaultJobDescs on mount
-  // so adding new JDs to jobDescs.js is immediately reflected
+  // Fetch job descriptions from Google Doc via API on mount
   useEffect(() => {
-    try {
-      localStorage.setItem("coding", JSON.stringify(defaultJobDescs));
-      setJobDescs(defaultJobDescs);
-    } catch {
-      // ignore storage errors
-    }
+    fetch('/api/jobdescs')
+      .then(r => r.json())
+      .then(data => { if (data.jobDescs?.length) setJobDescs(data.jobDescs); })
+      .catch(() => {});
   }, []);
 
   // Toast helper functions
