@@ -55,7 +55,7 @@ const Toast = ({ message, type, onClose }) => {
     <div className={`fixed top-5 right-4 z-50 animate-toast-slide-in`}>
       <div className={`${getBgColor()} backdrop-blur-md border rounded-lg shadow-2xl p-4 min-w-[300px] max-w-md`}>
         <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0">{getIcon()}</div>
+          <div className="shrink-0">{getIcon()}</div>
           <div className="flex-1">
             <p className="text-sm text-gray-200">{message}</p>
           </div>

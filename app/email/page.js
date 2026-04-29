@@ -115,7 +115,7 @@ export default function EmailPage() {
   `;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
 
       {/* Animated background blobs */}
@@ -132,15 +132,15 @@ export default function EmailPage() {
             <div className="flex items-center space-x-3">
               <Link href="/" className="flex items-center space-x-3 group">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur-lg opacity-70"></div>
-                  <div className="relative h-9 w-9 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <div className="absolute inset-0 bg-linear-to-r from-blue-500 to-purple-600 rounded-xl blur-lg opacity-70"></div>
+                  <div className="relative h-9 w-9 bg-linear-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                     <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  <h1 className="text-xl font-bold bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                     SkillScan AI
                   </h1>
                   <p className="text-xs text-gray-400">Enterprise Resume Intelligence</p>
@@ -174,7 +174,7 @@ export default function EmailPage() {
         {/* Hero */}
         <div className="text-center mb-10">
           <h2 className="text-4xl sm:text-5xl font-extrabold">
-            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               Send Candidate Emails
             </span>
           </h2>
@@ -224,13 +224,13 @@ export default function EmailPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setPreviewMode(false)}
-                className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all duration-200 border ${!previewMode ? "bg-gradient-to-r from-blue-600 to-purple-600 border-transparent text-white shadow-lg" : "bg-white/5 border-white/20 text-gray-400 hover:bg-white/10"}`}
+                className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all duration-200 border ${!previewMode ? "bg-linear-to-r from-blue-600 to-purple-600 border-transparent text-white shadow-lg" : "bg-white/5 border-white/20 text-gray-400 hover:bg-white/10"}`}
               >
                 Compose
               </button>
               <button
                 onClick={() => setPreviewMode(true)}
-                className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all duration-200 border ${previewMode ? "bg-gradient-to-r from-blue-600 to-purple-600 border-transparent text-white shadow-lg" : "bg-white/5 border-white/20 text-gray-400 hover:bg-white/10"}`}
+                className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all duration-200 border ${previewMode ? "bg-linear-to-r from-blue-600 to-purple-600 border-transparent text-white shadow-lg" : "bg-white/5 border-white/20 text-gray-400 hover:bg-white/10"}`}
               >
                 Preview
               </button>
@@ -304,7 +304,7 @@ export default function EmailPage() {
                 <button
                   type="submit"
                   disabled={sending}
-                  className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-base font-semibold text-white transition-all duration-300 ${sending ? "bg-gray-600 cursor-not-allowed opacity-50" : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 shadow-lg hover:shadow-xl"}`}
+                  className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-base font-semibold text-white transition-all duration-300 ${sending ? "bg-gray-600 cursor-not-allowed opacity-50" : "bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 shadow-lg hover:shadow-xl"}`}
                 >
                   {sending ? (
                     <>

@@ -182,7 +182,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
         {/* Toast Container */}
         {toast && (
           <Toast message={toast.message} type={toast.type} onClose={hideToast} />
@@ -201,15 +201,15 @@ const Home = () => {
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl blur-lg opacity-70"></div>
-                  <div className="relative h-9 w-9 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <div className="absolute inset-0 bg-linear-to-r from-blue-500 to-purple-600 rounded-xl blur-lg opacity-70"></div>
+                  <div className="relative h-9 w-9 bg-linear-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                     <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  <h1 className="text-xl font-bold bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                     SkillScan AI
                   </h1>
                   <p className="text-xs text-gray-400">Enterprise Resume Intelligence</p>
@@ -248,7 +248,7 @@ const Home = () => {
           {/* Hero Section */}
           <div className="text-center mb-12">
             <h2 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold">
-              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-gradient">
+              <span className="bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-gradient">
                 Extract Skills  
               <span className="text-white ml-4">in Seconds</span>
 
@@ -290,7 +290,7 @@ const Home = () => {
                           <div className="flex-1 relative border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-200 overflow-hidden">
                             {r.file ? (
                               <div className="flex items-center gap-3 px-4 py-3">
-                                <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <div className="h-8 w-8 bg-linear-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shrink-0">
                                   <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                   </svg>
@@ -306,7 +306,7 @@ const Home = () => {
                               </div>
                             ) : (
                               <label className="flex items-center gap-3 px-4 py-3 cursor-pointer">
-                                <div className="h-8 w-8 border border-dashed border-white/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <div className="h-8 w-8 border border-dashed border-white/30 rounded-lg flex items-center justify-center shrink-0">
                                   <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                   </svg>
@@ -322,7 +322,7 @@ const Home = () => {
                             <button
                               type="button"
                               onClick={() => removeResume(r.id)}
-                              className="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200"
+                              className="h-8 w-8 shrink-0 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200"
                             >
                               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -379,7 +379,7 @@ const Home = () => {
                       disabled={loading || resumes.every(r => !r.file) || !message}
                       className={`group relative w-full flex justify-center items-center px-6 py-3 text-base font-semibold rounded-xl text-white transition-all duration-300 ${loading || resumes.every(r => !r.file) || !message
                           ? "bg-gray-600 cursor-not-allowed opacity-50"
-                          : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 shadow-lg hover:shadow-xl transform "
+                          : "bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 shadow-lg hover:shadow-xl transform "
                         }`}
                     >
                       {loading ? (
@@ -412,9 +412,9 @@ const Home = () => {
                     <h3 className="text-lg font-semibold text-white">Results — {results.filter(r => r.skillFound).length} of {results.length} matched</h3>
                     {results.map((result, index) => (
                       <div key={index} className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl blur-xl"></div>
+                        <div className="absolute inset-0 bg-linear-to-r from-blue-500/10 to-purple-500/10 rounded-xl blur-xl"></div>
                         <div className="relative bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden">
-                          <div className="px-5 py-3 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-b border-white/20 flex items-center gap-2">
+                          <div className="px-5 py-3 bg-linear-to-r from-blue-500/10 to-purple-500/10 border-b border-white/20 flex items-center gap-2">
                             <div className={`h-2 w-2 rounded-full animate-pulse ${result.skillFound ? 'bg-green-400' : 'bg-red-400'}`}></div>
                             <span className="text-sm font-medium text-gray-200 truncate flex-1">{result.fileName}</span>
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${result.skillFound ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'
@@ -513,7 +513,7 @@ const Home = () => {
             <div className="mt-6 flex justify-center">
               <button
                 onClick={openChat}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl text-white text-sm font-semibold shadow-lg transition-all duration-200 hover:scale-105"
+                className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl text-white text-sm font-semibold shadow-lg transition-all duration-200 hover:scale-105"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -594,7 +594,7 @@ const Home = () => {
               { icon: "🎯", label: "Detection Accuracy", value: "99.2%", color: "from-purple-500/20 to-purple-600/20" },
               { icon: "🔒", label: "Data Privacy", value: "End-to-end encrypted", color: "from-pink-500/20 to-pink-600/20" }
             ].map((stat, index) => (
-              <div key={index} className={`bg-gradient-to-br ${stat.color} backdrop-blur-sm rounded-xl border border-white/20 p-6 text-center hover:scale-105 transition-all duration-300`}>
+              <div key={index} className={`bg-linear-to-br ${stat.color} backdrop-blur-sm rounded-xl border border-white/20 p-6 text-center hover:scale-105 transition-all duration-300`}>
                 <div className="text-3xl mb-2">{stat.icon}</div>
                 <div className="text-2xl font-bold text-white">{stat.value}</div>
                 <div className="text-xs text-gray-300 mt-1">{stat.label}</div>
