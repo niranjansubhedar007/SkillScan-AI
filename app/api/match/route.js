@@ -67,23 +67,33 @@ export async function POST(req) {
     // GOOD_MATCH_THRESHOLD: cosine ≥ 0.62 means a genuinely relevant JD.
     // Below that the best match is weak, so scores stay low to reflect reality.
 
-    const GOOD_MATCH_THRESHOLD = 0.62; // determined empirically by testing various queries and resumes against the jobDescs s
-    const maxSimilarity = Math.max(...scores);
+    // Build per-JD similarity: for each JD take the MAX score across its chunks
+    // (scores[] is indexed by flattened chunk position, not JD position)
+    let chunkOffset = 0;
+    const jdSimilarities = jdChunksArr.map((jd) => {
+      const numChunks = jd.chunkCount;
+      const chunkScores = numChunks > 0 ? scores.slice(chunkOffset, chunkOffset + numChunks) : [0];
+      chunkOffset += numChunks;
+      return { id: jd.id, similarity: Math.max(...chunkScores), chunks: jd.chunks, chunkCount: numChunks };
+    });
+
+    const maxSimilarity = Math.max(...jdSimilarities.map(j => j.similarity));
+
+    const GOOD_MATCH_THRESHOLD = 0.62;
     const ratio = Math.min(1, maxSimilarity / GOOD_MATCH_THRESHOLD);
     const absoluteMultiplier = Math.pow(ratio, 2); // squashes weak absolute matches
 
-    const matches = jobDescs.map((job, i) => {
-      const similarity = scores[i];
+    const matches = jobDescs.map((job) => {
+      const jdSim = jdSimilarities.find(j => j.id === job.id);
+      const similarity = jdSim ? jdSim.similarity : 0;
       const relative = maxSimilarity > 0 ? similarity / maxSimilarity : 0;
       const score = Math.round(Math.pow(relative, 2) * absoluteMultiplier * 100);
-      // Find chunk info for this JD
-      const chunkInfo = jdChunksArr.find(j => j.id === job.id);
       return {
         id: job.id,
         score,
         rawSimilarity: Math.round(similarity * 1000) / 1000,
-        chunkCount: chunkInfo ? chunkInfo.chunkCount : 0,
-        chunks: chunkInfo ? chunkInfo.chunks : [],
+        chunkCount: jdSim ? jdSim.chunkCount : 0,
+        chunks: jdSim ? jdSim.chunks : [],
       };
     });
 

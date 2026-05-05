@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Skillscan-AI",
+  title: "Turtlenut-AI",
   description: " A tool to help you find the right job based on your skills and experience.",
 };
 

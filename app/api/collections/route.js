@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const { collections } = await qdrant.getCollections();
     const resumeCollections = collections
-      .filter((c) => c.name.startsWith('resume_'))
+      .filter((c) => c.name)
       .map((c) => ({ name: c.name }));
     return NextResponse.json({ collections: resumeCollections });
   } catch (error) {

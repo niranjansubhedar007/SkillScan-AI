@@ -1,6 +1,6 @@
 import { QdrantClient } from '@qdrant/js-client-rest';
 
-const COLLECTION_NAME = 'resume_chunks';
+const COLLECTION_NAME = 'chunks';
 const VECTOR_SIZE = 1536; // text-embedding-ada-002 output size
 
 const qdrant = new QdrantClient({

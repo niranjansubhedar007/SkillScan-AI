@@ -1,5 +1,44 @@
 "use client";
 import { useState, useEffect, useRef, Suspense } from "react";
+
+// Strip any residual markdown symbols and render as plain text
+function PlainMessage({ content }) {
+  const clean = content
+    .replace(/\*\*/g, "")
+    .replace(/\*/g, "")
+    .replace(/^#{1,6} /gm, "")
+    .replace(/_([^_]+)_/g, "$1");
+
+  const lines = clean.split("\n");
+  const elements = [];
+  let listItems = [];
+
+  const flushList = () => {
+    if (listItems.length === 0) return;
+    elements.push(
+      <ul key={`ul-${elements.length}`} className="list-disc list-outside ml-5 mb-2 space-y-0.5">
+        {listItems}
+      </ul>
+    );
+    listItems = [];
+  };
+
+  lines.forEach((line, i) => {
+    if (/^- /.test(line)) {
+      listItems.push(<li key={i} className="leading-relaxed text-gray-200">{line.slice(2)}</li>);
+    } else if (/^\d+\. /.test(line)) {
+      listItems.push(<li key={i} className="leading-relaxed text-gray-200">{line.replace(/^\d+\. /, "")}</li>);
+    } else if (line.trim() === "") {
+      flushList();
+    } else {
+      flushList();
+      elements.push(<p key={i} className="mb-1.5 leading-relaxed text-gray-200">{line}</p>);
+    }
+  });
+
+  flushList();
+  return <div className="text-sm space-y-0.5">{elements}</div>;
+}
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -65,11 +104,14 @@ function ChatPageInner() {
         body: JSON.stringify({ question, collectionNames: selectedCollections }),
       });
       const data = await res.json();
-      setMessages((prev) => [...prev, { role: "assistant", content: data.answer }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.answer, toolCallEvents: data.toolCallEvents || [] },
+      ]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Something went wrong. Please try again." },
+        { role: "assistant", content: "Something went wrong. Please try again.", toolCallEvents: [] },
       ]);
     } finally {
       setChatLoading(false);
@@ -100,21 +142,13 @@ function ChatPageInner() {
               </div>
               <div>
                 <span className="text-base font-bold bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  SkillScan AI
+                  Turtlenut AI
                 </span>
                 <span className="ml-2 text-xs text-gray-400 hidden sm:inline">/ Resume Chat</span>
               </div>
             </div>
             <div className="flex items-center gap-2">
-            <Link
-              href="/email"
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-gray-300 transition-all duration-200"
-            >
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Send Email
-            </Link>
+           
             <Link
               href="/"
               className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-gray-300 transition-all duration-200"
@@ -249,10 +283,10 @@ function ChatPageInner() {
             )}
 
             {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              >
+              <div key={i} className="flex flex-col gap-1.5">
+                <div
+                  className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                >
                 {msg.role === "assistant" && (
                   <div className="h-7 w-7 rounded-lg bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center shrink-0 mt-0.5">
                     <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -261,19 +295,47 @@ function ChatPageInner() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[75%] px-4 py-2.5 rounded-xl text-sm leading-relaxed whitespace-pre-wrap ${
+                  className={`max-w-[75%] px-4 py-2.5 rounded-xl text-sm leading-relaxed ${
                     msg.role === "user"
-                      ? "bg-blue-600/40 text-blue-100 rounded-br-sm"
+                      ? "bg-blue-600/40 text-blue-100 rounded-br-sm whitespace-pre-wrap"
                       : "bg-white/10 text-gray-200 rounded-bl-sm"
                   }`}
                 >
-                  {msg.content}
+                  {msg.role === "assistant" ? (
+                    <PlainMessage content={msg.content} />
+                  ) : (
+                    msg.content
+                  )}
                 </div>
                 {msg.role === "user" && (
                   <div className="h-7 w-7 rounded-lg bg-white/10 flex items-center justify-center shrink-0 mt-0.5">
                     <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
+                  </div>
+                )}
+                </div>
+
+                {/* Tool call events (e.g. email sent) */}
+                {msg.role === "assistant" && msg.toolCallEvents?.length > 0 && (
+                  <div className="ml-10 flex flex-col gap-1.5">
+                    {msg.toolCallEvents.map((evt, j) => (
+                      <div
+                        key={j}
+                        className="flex items-start gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300"
+                      >
+                        <svg className="h-4 w-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <div>
+                          <span className="font-semibold capitalize">{evt.tool.replace(/_/g, " ")}</span>
+                          {evt.tool === "send_email" && evt.args?.to && (
+                            <span className="ml-1 text-emerald-400">→ {evt.args.to}</span>
+                          )}
+                          <p className="text-emerald-400/80 mt-0.5">{evt.result}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
