@@ -6,7 +6,7 @@ import { chunkAndStoreResume, searchRelevantChunks } from './chunkResume';
 async function makeCollectionName(fileName, buffer) {
   const base = fileName.replace(/\.[^/.]+$/, '')
     .toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').substring(0, 20).replace(/^_|_$/g, '');
-  // Deterministic 8-char hash of file content — same file = same collection
+  // Deteministic 8-char hash of file content — same file = same collection
   const hashBuf = await crypto.subtle.digest('SHA-256', buffer);
   const hashHex = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 8);
   return `resume_${base}_${hashHex}`;
