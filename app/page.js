@@ -145,7 +145,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden flex flex-col">
+      <div className="min-h-screen lg:h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-auto lg:overflow-hidden flex flex-col">
         {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
 
         {/* Animated Background */}
@@ -182,10 +182,10 @@ const Home = () => {
         </nav>
 
         {/* 3-Column Layout */}
-        <div className="relative z-10 flex-1 flex overflow-hidden max-w-screen-2xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 gap-4 min-h-0">
+        <div className="relative z-10 flex-1 flex flex-col lg:flex-row overflow-visible lg:overflow-hidden max-w-screen-2xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 gap-4 lg:min-h-0">
 
           {/* LEFT — Upload */}
-          <div className="w-72 shrink-0 flex flex-col gap-3 overflow-y-auto">
+          <div className="w-full lg:w-72 lg:shrink-0 flex flex-col gap-3 lg:overflow-y-auto">
             <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden">
               <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2">
                 <span className="text-sm">📄</span>
@@ -281,7 +281,7 @@ const Home = () => {
           </div>
 
           {/* CENTER — Chat */}
-          <div className="flex-1 flex flex-col bg-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden min-h-0">
+          <div className="w-full lg:flex-1 flex flex-col bg-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden min-h-[480px] lg:min-h-0">
             <div className="px-4 py-3 border-b border-white/10 shrink-0">
               <div className="flex items-center gap-2">
                 <span className="text-sm">💬</span>
@@ -426,8 +426,8 @@ const Home = () => {
           </div>
 
           {/* RIGHT — Top 5 Job Matches */}
-          <div className="w-80 shrink-0 flex flex-col">
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden flex flex-col h-full">
+          <div className="w-full lg:w-80 lg:shrink-0 flex flex-col">
+              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden flex flex-col min-h-[300px] lg:h-full">
               <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2 shrink-0">
                 <span className="text-sm">🎯</span>
                 <h2 className="text-sm font-semibold text-gray-200">Top 5 Job Matches</h2>
